@@ -323,3 +323,164 @@ print("test_service branch update")
     - 추가로 merge 했다고 브랜치가 없어지는 것이 아님
         - 다른 브랜치의 내용을 merge하고자하는 브랜치의 내용에 적용한다는 의미
         - 그리고 충돌이 안 일어나는건 자동으로 merge됨 (주의해야할 수도 있음 - 바로 눈에 띄지 않기 때문)
+
+---
+
+## 다양한 git merge 방법 (3-way, fast-forward, squash, rebase)
+
+### 3-way merge
+- 기존에 했던 merge 전략
+- 설명하자면, main에서도 커밋이 계속되고 있고, 새 브랜치에서도 커밋을 하다가 합치고 싶으면 
+- 자동으로 3-way merge가 일어나게 됨
+> ![alt text](image-1.png)
+
+### fast-forward merge
+- main에서 브랜치를 하나 파고, main에서는 이제 commit을 하지 않는다면?
+- 그냥 새 브랜치를 main 브랜치로써 사용함
+> ![alt text](image.png)
+    - 자동으로 발동함
+    - 왜 사용할까?
+        - 딱히 브랜치간의 차이점이 없기 때문임
+
+- 오해하면 안되는 개념
+    - main에서 이미 새로운 브랜치를 파고, 그 이후 main에서도 커밋, 새 브랜치에서도 commit을 하다가 merge를 진행
+    - 그 후 새 브랜치에서 다시 커밋을 진행하고, main에서는 커밋을 진행하지 않는다면? -> 이때 Fast-Forward일까? -> No -> ORT라는 merge가 동작함 (이건 일단 나중에 필요하면 알아보자)
+    - 완전히 새 브랜치를 main의 최근 commit을 기반으로 판 후에, main은 commit을 진행하지 않고, 브랜치2에서 commit을 진행하고 나중에 merge를 진행할 경우 -> Fast-Forward merge 발동
+
+- 실습으로 봐보자
+```bash
+git branch ff
+git switch ff
+```
+
+```python
+# test_ff.py 생성
+print("test_ff")
+```
+
+```bash
+git add .
+git commit -m "create test_ff.py"
+git switch main
+git merge ff
+# Updating 0c0252e..dc330c1
+# Fast-forward
+#  test_ff.py | 3 ++-
+#  1 file changed, 2 insertions(+), 1 deletion(-)
+```
+    - Fast-forwar를 사용했다는 것을 확인할 수 있음
+    ```bash
+    * dc330c1 (HEAD -> main, ff) update test_ff.py update ff
+    *   0c0252e Merge branch 'test_service'
+    |\
+    | * 11f68ba (test_service) create test_ff.py
+    * | 62edb06 test merge complete
+    ```
+        - 여기서 ff라는 브랜치를 찾아볼 수 없음
+
+- 그렇다면 ff는 없어진 것일까? 
+```bash
+git switch main
+```
+
+```python
+# app.py 
+print("test_ff")
+```
+
+```bash
+git add .
+git commit -m "main branch app.py add test_ff"
+```
+
+```bash
+git switch ff
+```
+
+```python
+# test_ff.py
+print("test_ff")
+```
+
+```bash
+git add .
+git commit -m "ff branch test_ff.py addd test_ff"
+git switch main
+git merge ff
+git log --oneline --all --graph
+# *   2455f6a (HEAD -> main) Merge branch 'ff'
+# |\
+# | * 07f5603 (ff) ff_test
+# * | e662b98 app.py add test_ff
+# |/
+# * dc330c1 update test_ff.py update ff
+# *   0c0252e Merge branch 'test_service'
+```
+    - 아까는 Fast-Forward merge가 일어나서 ff의 분기점을 찾을 수 없었지만
+    - 지금은 다시 ff의 분기점을 찾을 수 있음
+
+- 만약 자동으로 fast-forward merge가 발동되는게 싫다면?
+```bash
+git merge --no-ff ff
+```
+
+### 필요없는 브랜치 삭제
+```bash
+git branch -d ff
+git branch -D ff # merge를 하지 않은 브랜치는 -D를 붙여줘야함
+```
+
+### rebase and merge
+- 기본 개념
+> ![alt text](image-2.png)
+    - 새 브랜치의 commit 시점을 옮겨서
+> ![alt text](image-3.png)
+    - Fast-Forward merge를 함
+
+- 왜 사용할까?
+    - 브랜치 없이도 코드를 잘짜는 고수 같아보일 수 있음 ㅋㅋ
+    - 사실은 다 3-way merge를 하면 git log가 지저분하게 보임 (추적이 어려움)
+
+- 단점
+    - conflict가 많이 발생할 수 밖에 없음 (main의 commit도 진행되었기 때문에)
+
+- 실제 사용 방법
+```bash
+git switch <신규브랜치명>
+git rebase <중심브랜치명>
+git switch <중심브랜치명>
+git merge <새로운브랜치명>
+```
+    - 원래 merge와 달리 신규 브랜치에서 rebase를 한 후에 main에서 merge를 수행함
+
+### squash and merge
+- 기본 개념
+    - 3-way merge는 추적이 더러움
+    - main 브랜치에 merge를 하면 merge한 브랜치의 커밋 기록들이 다 나옴 (지저분함)
+    - 그래서 이전 merge들 기록을 하나로 합쳐서 main에서 하나의 commit으로 
+    
+- 예시
+> ![alt text](image-4.png)
+> ![alt text](image-5.png)
+
+- 사용 방법
+```bash
+git merge --squash <브랜치명>
+```
+
+### 추가적으로 
+- 현재 기준으로 어떤 merge 전략을 사용할 것인지 초보가 판단하기 힘듦
+- 그래도 기준을 만들어두면 좋음
+- 회사가면 있음 없으면 퇴사
+- 현재 존재하는 branch 확인법
+```bash
+git branch
+```
+
+### 어렵다... 일단 넘어가고, 따로 공부해보자!!
+
+---
+
+## git revert, reset, restore
+
+### 
