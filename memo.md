@@ -483,4 +483,108 @@ git branch
 
 ## 6. git revert, reset, restore
 
-### 
+### commit만 하면 안됨
+- 파일 복구 가능
+- commit 복구 가능
+- 과거로 이동 가능
+```bash
+git add .
+git commit -m "create a.py"
+
+git add .
+git commit -m "create b.py"
+
+git add .
+git commit -m "create c.py"
+```
+
+### 파일을 복구하려면 git restore
+- 만약에 c.py에서 작업을 하다가 잘 안되서 완전히 되돌리고 싶다면?
+```bash
+git restore c.py
+git restore <파일명>
+``` 
+    - c.py의 마지막 commit으로 돌아감
+
+- 특정 커밋 시점의 파일로 복구 가능
+```bash
+git restore --source <커밋아이디> <파일명>
+```
+    - 해당 커밋아이디 시점의 해당 파일의 상태로 되돌릴 수 있음
+
+- 스테이징 취소
+```bash
+git restore --staged <파일명>
+```
+    - 특정 파일의 스테이징 취소 가능
+
+### commit을 복구하려면 git revert
+- 특정 커밋을 삭제하는 명령어는 없음
+- 단, 특정 커밋에서 작업한 것을 제거하는 commit은 생성 가능
+```bash
+git log --oneline
+# 275174c (HEAD -> main) create c.py
+# aedc9f7 create b.py
+# d6d91e9 create a.py
+```
+
+```bash
+git revert aedc9f7 # commit 메세지를 입력해야함 -> 커밋 기록을 만들어줄 것임
+git log --oneline
+# a8cf2da (HEAD -> main) Revert "create b.py"
+# 275174c create c.py
+# aedc9f7 create b.py
+# d6d91e9 create a.py
+```
+    - b.py 파일이 삭제됨
+    - 기록은 남음 -> 즉, 커밋 내역을 삭제하는 것은 안되지만, 특정 커밋에서 일어난 일은 삭제할 수 있음
+
+- 또한 여러 개의 커밋 아이디를 삭제할 수 있음
+```bash
+git revert <커밋아이디1> <커밋아이디2> ...
+# merge도 복구할 수 
+git revert HEAD # 가장 최근 commit 내역 삭제
+```
+
+### 시간을 되돌리고 싶다면 git 
+- 과거로 모든 걸 되돌리기
+```bash
+git reset --hard <커밋아이디>
+```
+    - 아예 해당 시점의 커밋 아이디의 상태로 완전히 되돌아감
+    - 협업할 할 때는 사용금지
+
+```bash
+git log --oneline
+# 275174c (HEAD -> main) create c.py
+# aedc9f7 create b.py
+# d6d91e9 create a.py
+```
+    - 결과를 보면 create c.py 위에 원래 b를 지웠다는 로그가 있어야하는데 없어진 걸 확인할 수 있음
+    - 이러면 어떻게 해야할까?
+
+- git reflog
+```bash
+git reflog
+# 275174c (HEAD -> main) HEAD@{0}: reset: moving to 275174c
+# a8cf2da HEAD@{1}: revert: Revert "create b.py"
+# 275174c (HEAD -> main) HEAD@{2}: commit: create c.py
+# aedc9f7 HEAD@{3}: commit: create b.py
+# d6d91e9 HEAD@{4}: commit (initial): create a.py
+```
+    - 지운 기록도 확인할 수 있음
+    - 여기서 git reset --hard를 사용해서 시간을 되돌리기 전으로 되돌아갈 수도 
+    
+- 완전히 지워버리지 않고 스테이징 시켜놓기
+```bash 
+git reset --soft <커밋아이디>
+```
+    - 해당 커밋 아이디로 되돌아기 전에 지금까지 했던 작업들을 스테이징 해놓음
+    - 실제로 해보니깐, 스테이징 영역에 있음, 지우지는 않음
+    - git add . / git commit -m "rollback c.py"을 하니깐, create c.py는 없어지고 rollback c.py 커밋이 생성됨
+
+- 완전히 지워버리지 않고 unstaged 해놓기
+```bash
+git reset --mixed <커밋아이디>
+```
+
