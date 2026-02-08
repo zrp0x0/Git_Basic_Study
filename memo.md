@@ -107,3 +107,60 @@ git status
 ```bash
 git log --all oneline
 ```
+
+---
+
+## git add, commit, diff 쉽게 하는 법 (VSCode)
+
+### git commit 뭐하러 입력함?
+- VSCode에서 GUI로 git add, commit 쉽게 가능
+    - Changes 항목에서 +를 눌러서 스테이징할 수 있음 (git add)
+    - Staged Changes에서 -를 눌러서 스테이징을 해제 할 수 있음 (???)
+    - Commit을 누르기 전에 위에 메세지를 입력해야함 (안 하면 하라고 뜨는데 귀찮음) (git commi -m)
+
+### git diff
+- commit을 그냥 막하면 안 좋음
+- commit하기 전에 이전 commit과의 파일 차이점을 확인하는 것이 좋음
+```bash
+git diff
+```
+    - 이전 commit과의 어떤 파일에서 어떤 차이가 있는지 확인할 수 있음
+    - j/k로 스크롤바 조작
+    - q로 종료
+    - 참고할 점: 엔터키 입력도 파일의 수정으로 입력함 (그러니깐 아무것도 안하고 옆에 엔터를 눌러도 diff로 인식함)   
+        - 그냥 모든 행위를 차이점으로 인식함
+
+- 만약 좀 더 고급지게 확인하고 싶다면?
+```bash
+git difftool
+```
+    - vim editor가 뜸
+    - 여기서 차이점을 분석할 수 있음
+    - vim 사용법과 동일
+
+- 조금 더 유용한 기능
+```bash
+git difftool <커밋아이디>
+git difftool <커밋아이디1> <커밋아이디2>
+```
+    - 현재 파일 vs 특정 커밋 비교 가능
+    - 커밋아이디1 vs 커밋아이디2 비교 가능
+
+- 커밋 아이디란?
+```bash
+git log --oneline --all
+# 0404cbd (HEAD -> main) update app.py add study git diff 2
+# b521fb0 update app.py delete update app.py add study git diff
+```
+    - 여기서 맨 앞에 b521fb0같이 16진수로 나오는 이상한 숫자가 바로 커밋 아이디
+
+### 에디터 부가기능
+- 에디터에서 설치할 수 있는 VSCode의 경우 Extension을 설치해서 좋은 툴을 사용하는게 더 좋을 수도 있음
+    - git graph 
+    
+---
+
+## git의 branch 만들기
+
+### branch 만드는 법
+
