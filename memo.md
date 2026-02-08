@@ -163,4 +163,163 @@ git log --oneline --all
 ## git의 branch 만들기
 
 ### branch 만드는 법
+- 만약에 새로운 기능을 추가하고 싶다면? -> 버그 발생하거나 망할 수도 있음
+- 기본적인 방법
+    - 파일 복사본을 만듦
+    - 코드를 먼저 짜보고 실행
+    - 안심하고 기존 코드에 반영
 
+- branch 기능을 이용하면 위의 과정을 쉽게 할 수 있음 (commit의 복사본을 만드는 것임)
+```bash
+git branch <작명>
+git branch test_service
+```
+    - 작명이라는 이름으로 브랜치를 하나 만들 수 있음
+
+- 특정 브랜치로 이동하고 싶다면?
+```bash
+git switch test_service
+```
+    - test_service라는 브랜치로 이동할 수 있음
+
+- 지금 내가 어느 브랜치에 있는지 알고 싶다면?
+```bash
+git status
+# On branch test_service
+```
+    - 현재 내가 test_service라는 브랜치에 있다는 것을 알 수 있음
+    - 참고사항: 원래 맨 처음 브랜치명은 main임 (초반에 설정을 그렇게 했음 - git 최초 설정 참고)
+    - main말고 master라는 이름으로 되어 있을 수도 있음
+
+- 이제 이동한 브랜치에 동일하게 git add, commit 등을 할 수 있음
+    - 완전히 다른 작업 공간임
+    - 이제 test_service.py라는 파일을 하나 생성
+```bash
+git add test_service.py # 또는 git add .
+git commit -m "create test_service.py"
+git log --oneline --all
+# 0471411 (HEAD -> test_service) create test_service.py
+# 0404cbd (main) update app.py add study git diff 2
+# b521fb0 update app.py delete update app.py add study git diff
+# b9a28d9 update app.py and create test_controller.py
+```
+    - 로그를 보면 HEAD -> test_service를 가리키고 있는 것을 볼 수 있음
+
+- 이제 브랜치 간의 이동이 가능함
+```bash
+git swtich main
+```
+    - test_service.py가 없어진 것을 확인할 수 있음
+    - 진짜로 없어진게 아니라 브랜치를 이동해서 원래 main의 commit 기록에는 test_service.py라는 파일이 없었기 때문임
+    - 다시 test_service 브랜치로 이동하면 생김
+
+### 해보기
+- main / test_service 브랜치에서 각각 작업하기
+```bash
+git switch main
+# test_controller.py 수정
+git add .
+git commit -m "update test_controller.py"
+```
+
+```bash
+git switch test_service
+# test_service.py 수정
+git add .
+git commit -m "update test_service.py"
+```
+
+- 로그 확인해보기
+```bash
+git log --oneline --all --graph
+# * 12e5e4c (HEAD -> main) update test_controller.py
+# | * 4ac970a (test_service) sorry update test_service.py really
+# | * 2b7128b update test_controller.py
+# | * 0471411 create test_service.py
+# |/  
+# * 0404cbd update app.py add study git diff 2
+# * b521fb0 update app.py delete update app.py add study git diff
+# * b9a28d9 update app.py and create test_controller.py
+# * 81261a9 create app.py
+```
+    - 지금까지의 기록이 그래프 형태로 나오는 것을 볼 수 있음
+    - 중간에 튀어나가는게 있는데 저게 바로 브랜치가 이동했다는 것임
+    - HEAD는 현재 나의 위치
+
+### 브랜치 합치기 (merge)
+- main 브랜치에 test_service 브랜치를 합치고 싶다면? (merge)
+```bash
+git switch main # 기준이 되는 브랜치로 이동해야함
+git merge test_service # 합칠 브랜치 명
+```
+
+- 자 근데 위의 마지막 명령어를 수행하기 전 발생할 수 있는 두 가지 시나리오를 봐보자
+    - 1. 각 브랜치에서 완전히 다른 파일을 수정했다면? -> 그냥 바로 merge 성공
+    - 2. 각 브랜치에서 겹치는 파일을 수정했다면? -> 충돌이 발생함 (conflict)
+        - 이 경우 충돌을 수동으로 해결해주어야함!!
+
+### 합칠 때 conflict 발생 가능
+- 시나리오 생성
+```python 
+# main - app.py
+print("Hello World")
+print("study git diff")
+print("study git diff 2") 
+
+print("main branch update")
+```
+
+```bash
+git switch main
+git add .
+git commit -m "update app.py main-branch"
+```
+
+``` python
+# test_service - app.py
+print("Hello World")
+print("study git diff")
+print("study git diff 2") 
+print("test_service branch update")
+```
+
+```bash
+git switch test_service
+git add .
+git commit -m "update app.py test_service-branch"
+```
+
+- 합치기
+```bash
+git switch main
+git merge test_service
+``` 
+
+```python
+print("Hello World")
+print("study git diff")
+print("study git diff 2") 
+<<<<<<< HEAD
+
+print("main branch update")
+=======
+print("test_service branch update")
+>>>>>>> test_service
+```
+    - 다음과 같이 app.py에 충돌이 일어났음을 확인할 수 있음
+    - 저 HEAD (Current Change) ~ ===까지가 현재 branch에서 다른 영역
+    - === ~ test_service (Incoming Change)까지가 다른 브랜치에서는 이렇게 되어있다
+    - 즉 충돌되는 영역을 보여주고, 그 부분을 실제로 수정해야함
+
+- 수정을 해보자
+```python
+print("Hello World")
+print("study git diff")
+print("study git diff 2")
+
+print("test_service branch update")
+```
+    - 수정을 하고 반드시 git add / commit을 수행해주어야 실제로 반영이 됨
+    - 추가로 merge 했다고 브랜치가 없어지는 것이 아님
+        - 다른 브랜치의 내용을 merge하고자하는 브랜치의 내용에 적용한다는 의미
+        - 그리고 충돌이 안 일어나는건 자동으로 merge됨 (주의해야할 수도 있음 - 바로 눈에 띄지 않기 때문)
