@@ -1,6 +1,6 @@
 # Git / Github
 
-## git 설치법 (윈도우)
+## 1. git 설치법 (윈도우)
 
 ### git이란?
 - 버전관리 소프트웨어
@@ -31,7 +31,7 @@ git config --global user.name "내가 사용할 이름"
 
 ---
 
-## git add, commit으로 파일 기록
+## 2. git add, commit으로 파일 기록
 
 ### 코드 짜면서 git 사용해보기
 - 작업 폴더에서 git을 사용하고 싶으면 git init부터 입력
@@ -110,7 +110,7 @@ git log --all oneline
 
 ---
 
-## git add, commit, diff 쉽게 하는 법 (VSCode)
+## 3. git add, commit, diff 쉽게 하는 법 (VSCode)
 
 ### git commit 뭐하러 입력함?
 - VSCode에서 GUI로 git add, commit 쉽게 가능
@@ -160,7 +160,7 @@ git log --oneline --all
     
 ---
 
-## git의 branch 만들기
+## 4. git의 branch 만들기
 
 ### branch 만드는 법
 - 만약에 새로운 기능을 추가하고 싶다면? -> 버그 발생하거나 망할 수도 있음
@@ -326,7 +326,7 @@ print("test_service branch update")
 
 ---
 
-## 다양한 git merge 방법 (3-way, fast-forward, squash, rebase)
+## 5. 다양한 git merge 방법 (3-way, fast-forward, squash, rebase)
 
 ### 3-way merge
 - 기존에 했던 merge 전략
@@ -481,6 +481,6 @@ git branch
 
 ---
 
-## git revert, reset, restore
+## 6. git revert, reset, restore
 
 ### 
